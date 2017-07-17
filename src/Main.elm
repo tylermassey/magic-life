@@ -1,24 +1,53 @@
 module Main exposing (..)
 
+import Array exposing (Array, get, set)
+import Array.Extra exposing (map2)
 import Html exposing (Html, text, div, img, button)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onWithOptions)
 import Json.Decode as Json
+import Time exposing (Time, millisecond)
+import Random
+import DieFaces exposing (viewDieFace)
 
 
 ---- MODEL ----
 
 
+type PlayerView
+    = ScoreView
+    | DiceView
+
+
+type alias PlayerRecord =
+    { score : Int
+    , dieValue : Int
+    }
+
+
 type alias Model =
-    { playerOneScore : Int
-    , playerTwoScore : Int
+    { playerView : PlayerView
+    , playerRecords : Array PlayerRecord
+    , diceRollsLeft : Int
+    }
+
+
+initialPlayerRecord : PlayerRecord
+initialPlayerRecord =
+    { score = 20
+    , dieValue = 3
     }
 
 
 initialModel : Model
 initialModel =
-    { playerOneScore = 20
-    , playerTwoScore = 20
+    { playerView = ScoreView
+    , playerRecords =
+        Array.fromList
+            [ initialPlayerRecord
+            , initialPlayerRecord
+            ]
+    , diceRollsLeft = 4
     }
 
 
@@ -32,30 +61,90 @@ init =
 
 
 type Msg
-    = AddPointForPlayerOne
-    | AddPointForPlayerTwo
-    | SubtractPointForPlayerOne
-    | SubtractPointForPlayerTwo
+    = PlayerRecords PlayerRecordsMsg
     | ResetScores
+    | StartDiceRoll
+    | RollSingleDie Time
+    | GoToScoresView
+
+
+type PlayerRecordsMsg
+    = AddPoint Int
+    | SubtractPoint Int
+    | OnRollResult (List Int)
+
+
+updatePlayerRecords : PlayerRecordsMsg -> Array PlayerRecord -> Array PlayerRecord
+updatePlayerRecords playerRecordsMsg playerRecords =
+    case playerRecordsMsg of
+        AddPoint player ->
+            let
+                playerRecord =
+                    Maybe.withDefault initialPlayerRecord (get player playerRecords)
+
+                updatedPlayerRecord =
+                    { playerRecord | score = playerRecord.score + 1 }
+            in
+                set player updatedPlayerRecord playerRecords
+
+        SubtractPoint player ->
+            let
+                playerRecord =
+                    Maybe.withDefault initialPlayerRecord (get player playerRecords)
+
+                updatedPlayerRecord =
+                    { playerRecord | score = playerRecord.score - 1 }
+            in
+                set player updatedPlayerRecord playerRecords
+
+        OnRollResult dieValues ->
+            map2 (\dv playerRecord -> { playerRecord | dieValue = dv }) (Array.fromList dieValues) playerRecords
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        AddPointForPlayerOne ->
-            ( { model | playerOneScore = model.playerOneScore + 1 }, Cmd.none )
+        PlayerRecords msg ->
+            ( { model | playerRecords = updatePlayerRecords msg model.playerRecords }
+            , Cmd.none
+            )
 
-        AddPointForPlayerTwo ->
-            ( { model | playerTwoScore = model.playerTwoScore + 1 }, Cmd.none )
+        StartDiceRoll ->
+            ( { model
+                | playerView = DiceView
+                , diceRollsLeft = 5
+              }
+            , Cmd.none
+            )
 
-        SubtractPointForPlayerOne ->
-            ( { model | playerOneScore = model.playerOneScore - 1 }, Cmd.none )
+        RollSingleDie time ->
+            ( { model
+                | diceRollsLeft = model.diceRollsLeft - 1
+              }
+            , Cmd.map PlayerRecords (Random.generate OnRollResult (Random.list 2 (Random.int 1 6)))
+            )
 
-        SubtractPointForPlayerTwo ->
-            ( { model | playerTwoScore = model.playerTwoScore - 1 }, Cmd.none )
+        GoToScoresView ->
+            ( { model | playerView = ScoreView }
+            , Cmd.none
+            )
 
         ResetScores ->
-            ( initialModel, Cmd.none )
+            ( initialModel
+            , Cmd.none
+            )
+
+
+
+---- SUBSCRIPTIONS ----
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    if model.playerView == DiceView && model.diceRollsLeft > 0 then
+        Time.every (400 * millisecond) RollSingleDie
+    else
+        Sub.none
 
 
 
@@ -67,25 +156,64 @@ onClick message =
     onWithOptions "click" { stopPropagation = True, preventDefault = True } (Json.succeed message)
 
 
+viewPlayerScore : number -> number -> Html PlayerRecordsMsg
+viewPlayerScore score player =
+    if player == 1 then
+        div [ class "player-container" ]
+            [ div [ class "player-score-container" ]
+                [ div [ class "player-score-button button", onClick (SubtractPoint player) ] [ text "-" ]
+                , div [ class "player-score" ] [ text (toString score) ]
+                , div [ class "player-score-button button", onClick (AddPoint player) ] [ text "+" ]
+                ]
+            ]
+    else
+        div [ class "player-container" ]
+            [ div [ class "player-score-container" ]
+                [ div [ class "player-score-button button", onClick (AddPoint player) ] [ text "+" ]
+                , div [ class "player-score rotate" ] [ text (toString score) ]
+                , div [ class "player-score-button button", onClick (SubtractPoint player) ] [ text "-" ]
+                ]
+            ]
+
+
+viewPlayerArea : Model -> Int -> Html Msg
+viewPlayerArea model player =
+    case model.playerView of
+        ScoreView ->
+            Html.map PlayerRecords
+                (viewPlayerScore
+                    (get player model.playerRecords
+                        |> Maybe.map .score
+                        |> Maybe.withDefault 20
+                    )
+                    player
+                )
+
+        DiceView ->
+            viewDieFace
+                (get player model.playerRecords
+                    |> Maybe.map .dieValue
+                    |> Maybe.withDefault 0
+                )
+
+
+viewResetOrScoresOption : Model -> Html Msg
+viewResetOrScoresOption model =
+    if model.playerView /= DiceView then
+        div [ class "reset-button button", onClick ResetScores ] [ text "Reset" ]
+    else
+        div [ class "scores-button button", onClick GoToScoresView ] [ text "Scores" ]
+
+
 view : Model -> Html Msg
 view model =
     div [ class "app-container" ]
-        [ div [ class "player-container" ]
-            [ div [ class "player-score-container" ]
-                [ div [ class "player-score-button button", onClick SubtractPointForPlayerOne ] [ text "-" ]
-                , div [ class "player-score" ] [ text (toString model.playerOneScore) ]
-                , div [ class "player-score-button button", onClick AddPointForPlayerOne ] [ text "+" ]
-                ]
-            ]
+        [ viewPlayerArea model 0
         , div [ class "options-container" ]
-            [ div [ class "reset-button button", onClick ResetScores ] [ text "Reset" ] ]
-        , div [ class "player-container" ]
-            [ div [ class "player-score-container" ]
-                [ div [ class "player-score-button button", onClick AddPointForPlayerTwo ] [ text "+" ]
-                , div [ class "player-score rotate" ] [ text (toString model.playerTwoScore) ]
-                , div [ class "player-score-button button", onClick SubtractPointForPlayerTwo ] [ text "-" ]
-                ]
+            [ viewResetOrScoresOption model
+            , div [ class "dice-roll-button button", onClick StartDiceRoll ] [ text "Roll Dice" ]
             ]
+        , viewPlayerArea model 1
         ]
 
 
@@ -99,5 +227,5 @@ main =
         { view = view
         , init = init
         , update = update
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         }
