@@ -8,7 +8,10 @@ import Html.Events exposing (onWithOptions)
 import Json.Decode as Json
 import Time exposing (Time, millisecond)
 import Random
+import D20Icon exposing (d20Icon)
 import DieFaces exposing (viewDieFace)
+import DiceIcon exposing (diceIcon)
+import ResetIcon exposing (resetIcon)
 
 
 ---- MODEL ----
@@ -169,9 +172,9 @@ viewPlayerScore score player =
     else
         div [ class "player-container" ]
             [ div [ class "player-score-container" ]
-                [ div [ class "player-score-button button", onClick (AddPoint player) ] [ text "+" ]
+                [ div [ class "player-score-button button rotate", onClick (AddPoint player) ] [ text "+" ]
                 , div [ class "player-score rotate" ] [ text (toString score) ]
-                , div [ class "player-score-button button", onClick (SubtractPoint player) ] [ text "-" ]
+                , div [ class "player-score-button button rotate", onClick (SubtractPoint player) ] [ text "-" ]
                 ]
             ]
 
@@ -200,9 +203,9 @@ viewPlayerArea model player =
 viewResetOrScoresOption : Model -> Html Msg
 viewResetOrScoresOption model =
     if model.playerView /= DiceView then
-        div [ class "reset-button button", onClick ResetScores ] [ text "Reset" ]
+        div [ onClick ResetScores ] [ resetIcon ]
     else
-        div [ class "scores-button button", onClick GoToScoresView ] [ text "Scores" ]
+        div [ onClick GoToScoresView ] [ d20Icon ]
 
 
 view : Model -> Html Msg
@@ -211,7 +214,7 @@ view model =
         [ viewPlayerArea model 0
         , div [ class "options-container" ]
             [ viewResetOrScoresOption model
-            , div [ class "dice-roll-button button", onClick StartDiceRoll ] [ text "Roll Dice" ]
+            , div [ onClick StartDiceRoll ] [ diceIcon ]
             ]
         , viewPlayerArea model 1
         ]
