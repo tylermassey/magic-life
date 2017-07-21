@@ -8,6 +8,8 @@ import Html.Events exposing (onWithOptions)
 import Json.Decode as Json
 import Time exposing (Time, millisecond)
 import Random
+import ChevronDownIcon exposing (chevronDown)
+import ChevronUpIcon exposing (chevronUp)
 import D20Icon exposing (d20Icon)
 import DieFaces exposing (viewDieFace)
 import DiceIcon exposing (diceIcon)
@@ -164,17 +166,17 @@ viewPlayerScore score player =
     if player == 1 then
         div [ class "player-container" ]
             [ div [ class "player-score-container" ]
-                [ div [ class "player-score-button button", onClick (SubtractPoint player) ] [ text "-" ]
+                [ div [ class "player-score-button button", onClick (SubtractPoint player) ] [ chevronDown ]
                 , div [ class "player-score" ] [ text (toString score) ]
-                , div [ class "player-score-button button", onClick (AddPoint player) ] [ text "+" ]
+                , div [ class "player-score-button button", onClick (AddPoint player) ] [ chevronUp ]
                 ]
             ]
     else
         div [ class "player-container" ]
             [ div [ class "player-score-container" ]
-                [ div [ class "player-score-button button rotate", onClick (AddPoint player) ] [ text "+" ]
+                [ div [ class "player-score-button button rotate", onClick (AddPoint player) ] [ chevronUp ]
                 , div [ class "player-score rotate" ] [ text (toString score) ]
-                , div [ class "player-score-button button rotate", onClick (SubtractPoint player) ] [ text "-" ]
+                , div [ class "player-score-button button rotate", onClick (SubtractPoint player) ] [ chevronDown ]
                 ]
             ]
 

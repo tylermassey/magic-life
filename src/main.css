@@ -1,16 +1,14 @@
 html {
-  background-image: -webkit-linear-gradient(330deg, #fdfbfb 0%, #ebedee 100%);
-  background-image: -o-linear-gradient(330deg, #fdfbfb 0%, #ebedee 100%);
-  background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+  background: #D4E2E7;
   height: 100%;
 }
 
 body {
-  font-family: 'Cinzel Decorative', serif; 
+  font-family: sans-serif; 
   font-size: 30px;
   margin: 0;
   height: 90vh;
-  color: #293c4b;
+  color: #608392;
 }
 
 #root {
@@ -30,7 +28,7 @@ body {
 
 .player-container {
   width: 100%;
-  max-width: 700px;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
 }
@@ -49,11 +47,11 @@ body {
 }
 
 .player-score-button {
-  width: 60px;
-  height: 60px;
-  border: 1px solid #293C4B;
+  width: 50px;
+  height: 50px;
   border-radius: 40px;
   font-size: 50px;
+  background: #608392;
 }
 
 .options-container {
@@ -66,7 +64,7 @@ body {
 
 .reset-button, .scores-button, .dice-roll-button {
   display: block;
-  border: 1px solid #293C4B;
+  border: 1px solid #608392;
   border-radius: 2px;
   width: 100px;
   height: 35px;
@@ -82,8 +80,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  color: #293C4B;
+  color: #608392;
   user-select: none;
   cursor: pointer;
 }
