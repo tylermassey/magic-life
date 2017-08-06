@@ -2,8 +2,8 @@ module Main exposing (..)
 
 import Array exposing (Array, get, set)
 import Array.Extra exposing (map2)
-import Html exposing (Html, text, div, img, button)
-import Html.Attributes exposing (class)
+import Html exposing (Html, a, text, div, img, button)
+import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onWithOptions)
 import Json.Decode as Json
 import Time exposing (Time, millisecond)
@@ -219,6 +219,9 @@ view model =
             , div [ onClick StartDiceRoll ] [ diceIcon ]
             ]
         , viewPlayerArea model 1
+        , div [ class "footer" ]
+            [ a [ href "https://github.com/tylermassey/magic-life", target "_blank", class "source-link" ] [ text "source code" ]
+            ]
         ]
 
 

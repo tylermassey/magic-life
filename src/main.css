@@ -1,10 +1,11 @@
 html {
   background: #D4E2E7;
   height: 100%;
+  touch-action: manipulation
 }
 
 body {
-  font-family: sans-serif; 
+  font-family: 'Droid Sans Mono', sans-serif;
   font-size: 30px;
   margin: 0;
   height: 90vh;
@@ -16,6 +17,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.root-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .app-container {
@@ -84,6 +91,32 @@ body {
   user-select: none;
   cursor: pointer;
 }
+
+.footer {
+  position: absolute;
+  bottom: 8px;
+  width: 80px;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  font-size: 0.4em;
+}
+
+.source-link {
+  color: #A5BCC5;
+  text-decoration: none;
+  font-weight: 300;
+}
+
+.source-link:visited {
+  color: #A5BCC5;
+}
+
+.source-link:hover {
+  color: #608392;
+}
+
 
 /* die faces */
 
